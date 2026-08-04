@@ -27,7 +27,19 @@ pipeline {
                     bat 'dotnet build --configuration Release'
                 }
             }
+        }        
+    }
+    post {
+        always {
+            cleanWs()
+        }
+        success {
+            echo "Compilacion correcta"
+        }
+        failure {
+            echo "Error en compilacion"
         }
         
     }
+    
 }
