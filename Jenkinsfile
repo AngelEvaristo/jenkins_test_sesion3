@@ -27,7 +27,17 @@ pipeline {
                     bat 'dotnet build --configuration Release'
                 }
             }
+        }
+
+        stage ('Deploy DEV'){
+            when {
+             branch 'develop'
+            }
+            steps{
+                echo 'Despliegue DEV'
+            }
         }        
+        
     }
     post {
         always {
