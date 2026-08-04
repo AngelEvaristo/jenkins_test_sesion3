@@ -43,6 +43,7 @@ pipeline {
              branch 'main'
             }
             steps{
+                input message: '¿Autotiza la ejecucion?'
                 echo 'Despliegue PROD'
             }
         }  
