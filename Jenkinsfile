@@ -9,6 +9,21 @@ pipeline {
                 dotnetrestore solution: 'MyMinimalApi.sln'
             }
         }
+        stage('Build') {
+            steps {
+                dotnetbuild solution: 'MyMinimalApi.sln', configuration: 'Release'
+            }
+        }
+        stage('Test') {
+            steps {
+                dotnettest solution: 'MyMinimalApi.sln', configuration: 'Release'
+            }
+        }
+        stage('Publish') {
+            steps {
+                dotnetpublish solution: 'MyMinimalApi.sln', configuration: 'Release', outputdir: 'publish'
+            }
+        }
     }
 
     // stages {
