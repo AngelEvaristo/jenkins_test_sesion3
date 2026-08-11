@@ -1,7 +1,15 @@
 pipeline {
     
-    agent { label 'windows' }
-    
+    agent any
+
+    parameters {
+        string(
+            name: 'BRANCH_NAME',
+            defaultValue: 'main',
+            description: 'Nombre de la rama a compilar'
+        )
+    }    
+
     environment {
         DN_VERSION= "9.0"
     }
@@ -9,7 +17,7 @@ pipeline {
     stages {
         stage ('Clonar desde Github'){
             steps {
-                checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'github_repo', url: 'https://github.com/AngelEvaristo/jenkins_test_sesion3.git']])
+                checkout scmGit(branches: [[name: "*/${params.BRANCH_NAME}"]], extensions: [], userRemoteConfigs: [[credentialsId: 'github_repo', url: 'https://github.com/AngelEvaristo/jenkins_test_sesion3.git']])
             }
         }
         
