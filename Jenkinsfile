@@ -8,6 +8,12 @@ pipeline {
             defaultValue: 'main',
             description: 'Nombre de la rama a compilar'
         )
+
+        booleanParam(
+            name: 'COMPILE',
+            defaultValue: false,
+            description: 'Compilar el proyecto'
+        )
     }    
 
     environment {
@@ -30,6 +36,9 @@ pipeline {
         }
 
         stage ('Compilar'){
+            when {
+                expression { return params.COMPILE }
+            }
             steps{
                 script {
                     bat 'dotnet build --configuration Release'
