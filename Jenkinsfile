@@ -33,10 +33,13 @@ pipeline {
         }
 
         stage('Deploy to App Service') {
-            withCredentials([azureServicePrincipal('SPN-test')]) {
-                bat 'az login --service-principal -u %AZURE_CLIENT_ID% -p %AZURE_CLIENT_SECRET% --tenant %AZURE_TENANT_ID%'
-                bat 'az webapp deployment source config-zip --resource-group test-jenkins-deploy --name dotnet-test-deploy --src publish.zip'
+            steps {
+                withCredentials([azureServicePrincipal('SPN-test')]) {
+                    bat 'az login --service-principal -u %AZURE_CLIENT_ID% -p %AZURE_CLIENT_SECRET% --tenant %AZURE_TENANT_ID%'
+                    bat 'az webapp deployment source config-zip --resource-group test-jenkins-deploy --name dotnet-test-deploy --src publish.zip'
+                }
             }
+
         }
     }
 
