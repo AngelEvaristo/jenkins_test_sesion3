@@ -8,6 +8,31 @@ pipeline {
             defaultValue: 'main',
             description: 'Nombre de la rama a compilar'
         )
+
+        booleanParam(
+            name: 'COMPILE',
+            defaultValue: false,
+            description: 'Compilar el proyecto'
+        )
+
+        booleanParam(
+            name: 'RUN_TESTS',
+            defaultValue: false,
+            description: 'Ejecutar pruebas'
+        )
+
+        booleanParam(
+            name: 'DEPLOY_PRD',
+            defaultValue: false,
+            description: 'Desplegar en PROD'
+        )
+
+        choice(
+            name: 'ENVIRONMENT',
+            choices: ['DEV', 'QA', 'PROD'],
+            description: 'Selecciona el entorno de despliegue'
+        )
+
     }    
 
     environment {
@@ -30,6 +55,9 @@ pipeline {
         }
 
         stage ('Compilar'){
+            when {
+                expression { return params.COMPILE }
+            }
             steps{
                 script {
                     bat 'dotnet build --configuration Release'
@@ -37,9 +65,20 @@ pipeline {
             }
         }
 
+        stage ('Tests'){
+            when {
+                expression { return params.RUN_TESTS }
+            }
+            steps{
+                script {
+                    bat 'dotnet test --configuration Release'
+                }
+            }
+        }        
+
         stage ('Deploy DEV'){
             when {
-             branch 'develop'
+                expression { return params.ENVIRONMENT == 'DEV' }
             }
             steps{
                 echo 'Despliegue DEV'
@@ -48,13 +87,13 @@ pipeline {
 
         stage ('Deploy PROD'){
             when {
-             branch 'main'
+                expression { return params.ENVIRONMENT == 'PROD' && params.DEPLOY_PRD }
             }
             steps{
                 input message: '¿Autotiza la ejecucion?'
                 echo 'Despliegue PROD'
             }
-        }  
+        }
         
     }
     post {
