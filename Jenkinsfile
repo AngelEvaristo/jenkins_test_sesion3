@@ -14,6 +14,19 @@ pipeline {
             defaultValue: false,
             description: 'Compilar el proyecto'
         )
+
+        booleanParam(
+            name: 'RUN_TESTS',
+            defaultValue: false,
+            description: 'Ejecutar pruebas'
+        )
+
+        booleanParam(
+            name: 'DEPLOY_PRD',
+            defaultValue: false,
+            description: 'Desplegar en PROD'
+        )
+
     }    
 
     environment {
@@ -45,6 +58,17 @@ pipeline {
                 }
             }
         }
+
+        stage ('Tests'){
+            when {
+                expression { return params.RUN_TESTS }
+            }
+            steps{
+                script {
+                    bat 'dotnet test --configuration Release'
+                }
+            }
+        }        
 
         stage ('Deploy DEV'){
             steps{
