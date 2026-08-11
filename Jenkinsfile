@@ -1,112 +1,15 @@
 pipeline {
-    
     agent any
 
-    parameters {
-        string(
-            name: 'BRANCH_NAME',
-            defaultValue: 'main',
-            description: 'Nombre de la rama a compilar'
-        )
-
-        booleanParam(
-            name: 'COMPILE',
-            defaultValue: false,
-            description: 'Compilar el proyecto'
-        )
-
-        booleanParam(
-            name: 'RUN_TESTS',
-            defaultValue: false,
-            description: 'Ejecutar pruebas'
-        )
-
-        booleanParam(
-            name: 'DEPLOY_PRD',
-            defaultValue: false,
-            description: 'Desplegar en PROD'
-        )
-
-        choice(
-            name: 'ENVIRONMENT',
-            choices: ['DEV', 'QA', 'PROD'],
-            description: 'Selecciona el entorno de despliegue'
-        )
-
-    }    
-
-    environment {
-        DN_VERSION= "9.0"
-    }
-    
     stages {
-        stage ('Clonar desde Github'){
+        stage('Load remote pipeline') {
             steps {
-                checkout scmGit(branches: [[name: "*/${params.BRANCH_NAME}"]], extensions: [], userRemoteConfigs: [[credentialsId: 'github_repo', url: 'https://github.com/AngelEvaristo/jenkins_test_sesion3.git']])
-            }
-        }
-        
-        stage ('Resturar dependencias'){
-            steps{
-                script {
-                    bat 'dotnet restore'
+                dir('jenkins_test_sesion3_remote') {
+                   checkout([$class: 'GitSCM', branches: [[name: '*/main']], userRemoteConfigs: [[url: 'https://github.com/AngelEvaristo/jenkins_test_sesion3_remote.git', credentialsId: 'github_repo']]])
                 }
+                def buildAndTest = load 'pipelines/buildandtest.groovy'
+                buildAndTest.call('jenkins_test_sesion3')
             }
         }
-
-        stage ('Compilar'){
-            when {
-                expression { return params.COMPILE }
-            }
-            steps{
-                script {
-                    bat 'dotnet build --configuration Release'
-                }
-            }
-        }
-
-        stage ('Tests'){
-            when {
-                expression { return params.RUN_TESTS }
-            }
-            steps{
-                script {
-                    bat 'dotnet test --configuration Release'
-                }
-            }
-        }        
-
-        stage ('Deploy DEV'){
-            when {
-                expression { return params.ENVIRONMENT == 'DEV' }
-            }
-            steps{
-                echo 'Despliegue DEV'
-            }
-        } 
-
-        stage ('Deploy PROD'){
-            when {
-                expression { return params.ENVIRONMENT == 'PROD' && params.DEPLOY_PRD }
-            }
-            steps{
-                input message: '¿Autotiza la ejecucion?'
-                echo 'Despliegue PROD'
-            }
-        }
-        
     }
-    post {
-        always {
-            cleanWs()
-        }
-        success {
-            echo "Compilacion correcta"
-        }
-        failure {
-            echo "Error en compilacion"
-        }
-        
-    }
-    
 }
