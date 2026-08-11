@@ -22,6 +22,7 @@ pipeline {
         stage('Publish') {
             steps {
                 dotnetpublish solution: 'MyMinimalApi.sln', configuration: 'Release', outputdir: 'publish'
+                archiveArtifacts artifacts: 'publish/**', fingerprint: true
             }
         }
     }
