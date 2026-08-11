@@ -54,7 +54,7 @@ pipeline {
             }
         }
         
-        stage ('Resturar dependencias'){
+        stage ('Restore'){
             steps{
                 script {
                     bat 'make restore'
@@ -62,7 +62,7 @@ pipeline {
             }
         }
 
-        stage ('Compilar'){
+        stage ('build'){
             when {
                 expression { return params.COMPILE }
             }
@@ -79,10 +79,21 @@ pipeline {
             }
             steps{
                 script {
-                    bat 'dotnet test --configuration Release'
+                    bat 'make test'
                 }
             }
-        }        
+        }  
+
+        stage ('Publish'){
+            when {
+                expression { return params.COMPILE }
+            }
+            steps{
+                script {
+                    bat 'make publish'
+                }
+            }
+        }               
 
         stage ('Deploy DEV'){
             when {
