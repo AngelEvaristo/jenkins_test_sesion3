@@ -8,7 +8,7 @@ pipeline {
                     dir('jenkins_test_sesion3_remote') {
                     checkout([$class: 'GitSCM', branches: [[name: '*/main']], userRemoteConfigs: [[url: 'https://github.com/AngelEvaristo/jenkins_test_sesion3_remote.git', credentialsId: 'github_repo']]])
                     }
-                    def buildAndTest = load 'pipelines/buildandtest.groovy'
+                    def buildAndTest = load 'jenkins_test_sesion3_remote/pipelines/buildandtest.groovy'
                     buildAndTest.call('jenkins_test_sesion3')                
                 }
 
