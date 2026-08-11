@@ -45,6 +45,14 @@ pipeline {
                 checkout scmGit(branches: [[name: "*/${params.BRANCH_NAME}"]], extensions: [], userRemoteConfigs: [[credentialsId: 'github_repo', url: 'https://github.com/AngelEvaristo/jenkins_test_sesion3.git']])
             }
         }
+
+        stage ('Validar Makefile'){
+            steps{
+                script {
+                    bat 'make --version'
+                }
+            }
+        }
         
         stage ('Resturar dependencias'){
             steps{
