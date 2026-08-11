@@ -27,6 +27,12 @@ pipeline {
             description: 'Desplegar en PROD'
         )
 
+        choice(
+            name: 'ENVIRONMENT',
+            choices: ['DEV', 'QA', 'PROD'],
+            description: 'Selecciona el entorno de despliegue'
+        )
+
     }    
 
     environment {
@@ -71,17 +77,23 @@ pipeline {
         }        
 
         stage ('Deploy DEV'){
+            when {
+                expression { return params.ENVIRONMENT == 'DEV' }
+            }
             steps{
                 echo 'Despliegue DEV'
             }
         } 
 
         stage ('Deploy PROD'){
+            when {
+                expression { return params.ENVIRONMENT == 'PROD' && params.DEPLOY_PRD }
+            }
             steps{
                 input message: '¿Autotiza la ejecucion?'
                 echo 'Despliegue PROD'
             }
-        }  
+        }
         
     }
     post {
