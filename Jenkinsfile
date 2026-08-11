@@ -47,18 +47,12 @@ pipeline {
         }
 
         stage ('Deploy DEV'){
-            when {
-             branch 'develop'
-            }
             steps{
                 echo 'Despliegue DEV'
             }
         } 
 
         stage ('Deploy PROD'){
-            when {
-             branch 'main'
-            }
             steps{
                 input message: '¿Autotiza la ejecucion?'
                 echo 'Despliegue PROD'
