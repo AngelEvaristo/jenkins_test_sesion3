@@ -57,7 +57,7 @@ pipeline {
         stage ('Resturar dependencias'){
             steps{
                 script {
-                    bat 'dotnet restore'
+                    bat 'make restore'
                 }
             }
         }
@@ -68,7 +68,7 @@ pipeline {
             }
             steps{
                 script {
-                    bat 'dotnet build --configuration Release'
+                    bat 'make build'
                 }
             }
         }
