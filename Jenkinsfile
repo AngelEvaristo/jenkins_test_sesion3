@@ -25,7 +25,23 @@ pipeline {
                 archiveArtifacts artifacts: 'publish/**', fingerprint: true
             }
         }
+
+        stage('package for app service') {
+            steps {
+               bat 'powershell Compress-Archive -Path publish/* -DestinationPath publish.zip'
+            }
+        }
+
+        stage('Deploy to App Service') {
+            withCredentials([azureServicePrincipal('SPN-test')]) {
+                bat 'az login --service-principal -u %AZURE_CLIENT_ID% -p %AZURE_CLIENT_SECRET% --tenant %AZURE_TENANT_ID%'
+                bat 'az webapp deployment source config-zip --resource-group test-jenkins-deploy --name dotnet-test-deploy --src publish.zip'
+            }
+        }
     }
+
+
+
 
     // stages {
     //     stage('Load remote pipeline') {
