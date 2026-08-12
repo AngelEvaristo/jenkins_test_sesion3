@@ -3,6 +3,17 @@
 pipeline {
     agent any
 
+    parameters {
+        choice(name: 'DEPLOY_TARGET', choices: ['appservice', 'lambda'], description: 'Destino de despliegue')
+    }
+
+    environment {
+        APP_SERVICE_RESOURCE_GROUP = 'test-jenkins-deploy'
+        APP_SERVICE_NAME = 'dotnet-test-deploy'
+        AWS_REGION = 'us-east-1'
+        AWS_LAMBDA_FUNCTION_NAME = 'my-minimal-api-function'
+    }
+
     stages {
         stage('Restore Dependencies') {
             steps {
@@ -26,20 +37,35 @@ pipeline {
             }
         }
 
-        stage('package for app service') {
+        stage('Package Artifact') {
             steps {
-               bat 'powershell Compress-Archive -Path publish/* -DestinationPath publish.zip'
+                bat 'if exist publish.zip del /f /q publish.zip'
+                bat 'powershell Compress-Archive -Path publish/* -DestinationPath publish.zip'
             }
         }
 
         stage('Deploy to App Service') {
+            when {
+                expression { params.DEPLOY_TARGET == 'appservice' }
+            }
             steps {
                 withCredentials([azureServicePrincipal('SPN-test')]) {
                     bat 'az login --service-principal -u %AZURE_CLIENT_ID% -p %AZURE_CLIENT_SECRET% --tenant %AZURE_TENANT_ID%'
-                    bat 'az webapp deployment source config-zip --resource-group test-jenkins-deploy --name dotnet-test-deploy --src publish.zip'
+                    bat 'az webapp deployment source config-zip --resource-group %APP_SERVICE_RESOURCE_GROUP% --name %APP_SERVICE_NAME% --src publish.zip'
                 }
             }
+        }
 
+        stage('Deploy to AWS Lambda') {
+            when {
+                expression { params.DEPLOY_TARGET == 'lambda' }
+            }
+            steps {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-jenkins-creds']]) {
+                    bat 'aws sts get-caller-identity'
+                    bat 'aws lambda update-function-code --function-name %AWS_LAMBDA_FUNCTION_NAME% --zip-file fileb://publish.zip --region %AWS_REGION%'
+                }
+            }
         }
     }
 
